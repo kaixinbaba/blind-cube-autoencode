@@ -1,5 +1,6 @@
 import re
 from random import choice
+import fire
 # TODO custom config
 INIT_ENCODER = {
     'YG': None,
@@ -835,11 +836,21 @@ left\t[{self.left}] : {self.left_layer}
 def _sort_str(s):
     return ''.join(sorted(s))
 
-
-if __name__ == '__main__':
+def bcube(formula):
+    """
+    :param formula: cube random formula
+    :return:
+    """
     cube = MagicCube3by3()
-    cube.act("R2 B L' U D2 R' L2 U2 B' L2 U R2")
+    # cube.act("R2 B L' U D2 R' L2 U2 B' L2 U R2")
+    cube.act(formula)
     cube.start_encode()
     print(f"打乱公式 : {' '.join(cube.actions)}")
     print(f"角块编码 : {cube.corner_encode}")
     print(f"棱块编码 : {cube.edge_encode}")
+
+
+if __name__ == '__main__':
+    fire.Fire(dict(
+        bcube=bcube,
+    ))
