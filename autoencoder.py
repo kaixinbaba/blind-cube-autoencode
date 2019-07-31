@@ -565,6 +565,23 @@ class MagicCube3by3(object):
         self.edge_dict = self.update_edge()
 
         self.block_done = self.update_done()
+        self.need_flip = self.update_flip()
+        self.need_rotate = self.update_rotate()
+
+    def update_flip(self):
+        need_flip = []
+        for k, v in self.block_done.items():
+            if len(k) == 2 and v == 2:
+                need_flip.append(_sort_str(INIT_ENCODER.get(k)))
+        return need_flip
+
+    def update_rotate(self):
+        # TODO 判断顺时针和逆时针
+        need_rotate = []
+        for k, v in self.block_done.items():
+            if len(k) == 3 and v == 2:
+                need_rotate.append(_sort_str(INIT_ENCODER.get(k)))
+        return need_rotate
 
     def check_done(self, block):
         correct_direction = BLOCK_DONE.get(block.colors)
@@ -578,7 +595,7 @@ class MagicCube3by3(object):
         if current_direction == correct_direction:
             # fully correct
             return 1
-        elif sorted(current_direction) == sorted(correct_direction):
+        elif _sort_str(current_direction) == _sort_str(correct_direction):
             # need reverse color
             return 2
         else:
@@ -775,6 +792,7 @@ class MagicCube3by3(object):
                     return
                 else:
                     encode_list.append("-")
+                self.encode_code(encode_list, encoded_group, done_group, encode_group, encode_dict, all_group, next_e)
             else:
                 next_e = encode_dict.get(e)
                 self.encode_code(encode_list, encoded_group, done_group, encode_group, encode_dict, all_group, next_e)
@@ -846,11 +864,14 @@ def bcube(formula):
     cube.act(formula)
     cube.start_encode()
     print(f"打乱公式 : {' '.join(cube.actions)}")
-    print(f"角块编码 : {cube.corner_encode}")
-    print(f"棱块编码 : {cube.edge_encode}")
+    print("=======================================\n")
+    print(f"角块编码 : {cube.corner_encode}\t 需要翻转{cube.need_rotate}")
+    print("---------------------------------------\n")
+    print(f"棱块编码 : {cube.edge_encode}\t 需要翻色{cube.need_flip}")
 
 
 if __name__ == '__main__':
-    fire.Fire(dict(
-        bcube=bcube,
-    ))
+    # fire.Fire(dict(
+    #     bcube=bcube,
+    # ))
+    bcube("D' F2 R' L' B' U' L' B2 L' F B' D' L D2 L'")
