@@ -1,6 +1,6 @@
 import re
 from random import choice
-import fire
+
 # TODO custom config
 INIT_ENCODER = {
     'YG': None,
@@ -24,6 +24,22 @@ INIT_ENCODER = {
     'OG': 'ST',
     'RG': 'YX',
 }
+
+
+def _sort_str(s):
+    return ''.join(sorted(s))
+
+
+def sort_color(colors):
+    if isinstance(colors, str):
+        wait_sorted = [c for c in colors]
+    else:
+        wait_sorted = colors
+    wait_sorted = sorted(wait_sorted, key=lambda c: c, reverse=True)
+    return ''.join(wait_sorted)
+
+
+REVERSE_ENCODE = {_sort_str(v): k for k, v in INIT_ENCODER.items() if v is not None}
 
 CORNER_ENCODE_GROUP = {
     'A': 'ABC',
@@ -79,7 +95,6 @@ ALL_CORNER_GROUP = set(CORNER_ENCODE_GROUP.values())
 ALL_EDGE_GROUP = set(EDGE_ENCODE_GROUP.values())
 
 
-
 def get_blocks(c):
     return [k for k in INIT_ENCODER if c in k]
 
@@ -104,15 +119,6 @@ DIRECTION = ['U', 'D', 'L', 'R', 'F', 'B']
 
 def parse_action(action: str):
     return list(filter(lambda s: s.strip(), re.split(r'[\s+|,]', action)))
-
-
-def sort_color(colors):
-    if isinstance(colors, str):
-        wait_sorted = [c for c in colors]
-    else:
-        wait_sorted = colors
-    wait_sorted = sorted(wait_sorted, key=lambda c: c, reverse=True)
-    return ''.join(wait_sorted)
 
 
 def reverse_color(color):
@@ -534,6 +540,38 @@ BLOCK_DONE = {
 }
 
 
+def is_specified_direction(block, direction):
+    for color in block.colors:
+        d = getattr(block, color)
+        if d == direction:
+            return True
+    return False
+
+
+def is_f(block):
+    return is_specified_direction(block, 'F')
+
+
+def is_b(block):
+    return is_specified_direction(block, 'B')
+
+
+def is_u(block):
+    return is_specified_direction(block, 'U')
+
+
+def is_d(block):
+    return is_specified_direction(block, 'D')
+
+
+def is_l(block):
+    return is_specified_direction(block, 'L')
+
+
+def is_r(block):
+    return is_specified_direction(block, 'R')
+
+
 class MagicCube3by3(object):
 
     def __init__(self, up='Y', front='R'):
@@ -564,7 +602,7 @@ class MagicCube3by3(object):
         self.corner_dict = self.update_corner()
         self.edge_dict = self.update_edge()
 
-        self.block_done = self.update_done()
+        self.update_block()
         self.need_flip = self.update_flip()
         self.need_rotate = self.update_rotate()
 
@@ -579,9 +617,143 @@ class MagicCube3by3(object):
         # TODO 判断顺时针和逆时针
         need_rotate = []
         for k, v in self.block_done.items():
-            if len(k) == 3 and v == 2:
-                need_rotate.append(_sort_str(INIT_ENCODER.get(k)))
+            if len(k) == 3 and v == 2 and INIT_ENCODER.get(k) is not None:
+                clockwise = self.check_clockwise(k)
+                need_rotate.append(_sort_str(INIT_ENCODER.get(k)) + f'({clockwise})')
         return need_rotate
+
+    def check_clockwise(self, colors):
+        block = self.all_blocks.get(colors)
+        compare_index = 0
+        correct_d = BLOCK_DONE.get(colors)[compare_index]
+        color = block.colors[compare_index]
+        current_d = getattr(block, color)
+        if current_d == 'U':
+            if correct_d == 'L':
+                if is_f(block):
+                    return '逆'
+                else:
+                    return '顺'
+            elif correct_d == 'R':
+                if is_f(block):
+                    return '顺'
+                else:
+                    return '逆'
+            elif correct_d == 'F':
+                if is_l(block):
+                    return '顺'
+                else:
+                    return '逆'
+            elif correct_d == 'B':
+                if is_l(block):
+                    return '逆'
+                else:
+                    return '顺'
+        elif current_d == 'D':
+            if correct_d == 'L':
+                if is_f(block):
+                    return '顺'
+                else:
+                    return '逆'
+            elif correct_d == 'R':
+                if is_f(block):
+                    return '逆'
+                else:
+                    return '顺'
+            elif correct_d == 'F':
+                if is_l(block):
+                    return '逆'
+                else:
+                    return '顺'
+            elif correct_d == 'B':
+                if is_l(block):
+                    return '顺'
+                else:
+                    return '逆'
+        elif current_d == 'L':
+            if correct_d == 'U':
+                if is_f(block):
+                    return '顺'
+                else:
+                    return '逆'
+            elif correct_d == 'D':
+                if is_f(block):
+                    return '逆'
+                else:
+                    return '顺'
+            elif correct_d == 'F':
+                if is_u(block):
+                    return '逆'
+                else:
+                    return '顺'
+            elif correct_d == 'B':
+                if is_u(block):
+                    return '顺'
+                else:
+                    return '逆'
+        elif current_d == 'R':
+            if correct_d == 'U':
+                if is_f(block):
+                    return '逆'
+                else:
+                    return '顺'
+            elif correct_d == 'D':
+                if is_f(block):
+                    return '顺'
+                else:
+                    return '逆'
+            elif correct_d == 'F':
+                if is_u(block):
+                    return '顺'
+                else:
+                    return '逆'
+            elif correct_d == 'B':
+                if is_u(block):
+                    return '逆'
+                else:
+                    return '顺'
+        elif current_d == 'F':
+            if correct_d == 'L':
+                if is_u(block):
+                    return '顺'
+                else:
+                    return '逆'
+            elif correct_d == 'R':
+                if is_u(block):
+                    return '逆'
+                else:
+                    return '顺'
+            elif correct_d == 'U':
+                if is_l(block):
+                    return '逆'
+                else:
+                    return '顺'
+            elif correct_d == 'D':
+                if is_l(block):
+                    return '顺'
+                else:
+                    return '逆'
+        elif current_d == 'B':
+            if correct_d == 'L':
+                if is_u(block):
+                    return '逆'
+                else:
+                    return '顺'
+            elif correct_d == 'R':
+                if is_u(block):
+                    return '顺'
+                else:
+                    return '逆'
+            elif correct_d == 'U':
+                if is_l(block):
+                    return '顺'
+                else:
+                    return '逆'
+            elif correct_d == 'D':
+                if is_l(block):
+                    return '逆'
+                else:
+                    return '顺'
 
     def check_done(self, block):
         correct_direction = BLOCK_DONE.get(block.colors)
@@ -602,16 +774,19 @@ class MagicCube3by3(object):
             # wrong
             return 0
 
-    def update_done(self):
+    def update_block(self):
         done = {}
+        all_blocks = {}
         for layer_field in filter(lambda f: not f.startswith('__') and f.endswith('_layer'), dir(self)):
             layer = getattr(self, layer_field)
             for block in layer.blocks:
                 color = block.colors
-                if color in done:
-                    continue
-                done[color] = self.check_done(block)
-        return done
+                if color not in done:
+                    done[color] = self.check_done(block)
+                if color not in all_blocks:
+                    all_blocks[color] = block
+        self.block_done = done
+        self.all_blocks = all_blocks
 
     def update_corner(self):
         corner_dict = {}
@@ -797,7 +972,6 @@ class MagicCube3by3(object):
                 next_e = encode_dict.get(e)
                 self.encode_code(encode_list, encoded_group, done_group, encode_group, encode_dict, all_group, next_e)
 
-
     def choose_unencoded_code(self, encoded_group, done_group, all_group):
         unencoded_group = list(all_group - encoded_group - done_group)
         if not unencoded_group:
@@ -822,7 +996,8 @@ class MagicCube3by3(object):
         done_group = self._get_done_group()
         current_corner = self.up_layer.down_right_block
         e = self.find_encode(current_corner, 'U')
-        self.encode_code(corner_encode, encoded_group, done_group, CORNER_ENCODE_GROUP, self.corner_dict, ALL_CORNER_GROUP, e)
+        self.encode_code(corner_encode, encoded_group, done_group, CORNER_ENCODE_GROUP, self.corner_dict,
+                         ALL_CORNER_GROUP, e)
         self.corner_encode = ''.join(corner_encode)
         # edge
         edge_encode = []
@@ -851,8 +1026,7 @@ back\t[{self.back}] : {self.back_layer}
 right\t[{self.right}] : {self.right_layer}
 left\t[{self.left}] : {self.left_layer}
 '''
-def _sort_str(s):
-    return ''.join(sorted(s))
+
 
 def bcube(formula):
     """
@@ -874,4 +1048,5 @@ if __name__ == '__main__':
     # fire.Fire(dict(
     #     bcube=bcube,
     # ))
-    bcube("D' F2 R' L' B' U' L' B2 L' F B' D' L D2 L'")
+    # bcube("D' F2 R' L' B' U' L' B2 L' F B' D' L D2 L'")
+    bcube("L U")
