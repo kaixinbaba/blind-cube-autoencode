@@ -1050,5 +1050,5 @@ if __name__ == '__main__':
     fire.Fire(dict(
         bcube=bcube,
     ))
-    bcube("D' F2 R' L' B' U' L' B2 L' F B' D' L D2 L'")
+    # bcube("D' F2 R' L' B' U' L' B2 L' F B' D' L D2 L'")
     # bcube("L U")
