@@ -1,5 +1,6 @@
 import re
 from random import choice
+import fire
 
 # TODO custom config
 INIT_ENCODER = {
@@ -619,7 +620,8 @@ class MagicCube3by3(object):
         for k, v in self.block_done.items():
             if len(k) == 3 and v == 2 and INIT_ENCODER.get(k) is not None:
                 clockwise = self.check_clockwise(k)
-                need_rotate.append(_sort_str(INIT_ENCODER.get(k)) + f'({clockwise})')
+                clockwise_str = '顺' if clockwise else '逆'
+                need_rotate.append(_sort_str(INIT_ENCODER.get(k)) + f'({clockwise_str})')
         return need_rotate
 
     def check_clockwise(self, colors):
@@ -631,129 +633,129 @@ class MagicCube3by3(object):
         if current_d == 'U':
             if correct_d == 'L':
                 if is_f(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
             elif correct_d == 'R':
                 if is_f(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
             elif correct_d == 'F':
                 if is_l(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
             elif correct_d == 'B':
                 if is_l(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
         elif current_d == 'D':
             if correct_d == 'L':
                 if is_f(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
             elif correct_d == 'R':
                 if is_f(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
             elif correct_d == 'F':
                 if is_l(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
             elif correct_d == 'B':
                 if is_l(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
         elif current_d == 'L':
             if correct_d == 'U':
                 if is_f(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
             elif correct_d == 'D':
                 if is_f(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
             elif correct_d == 'F':
                 if is_u(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
             elif correct_d == 'B':
                 if is_u(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
         elif current_d == 'R':
             if correct_d == 'U':
                 if is_f(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
             elif correct_d == 'D':
                 if is_f(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
             elif correct_d == 'F':
                 if is_u(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
             elif correct_d == 'B':
                 if is_u(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
         elif current_d == 'F':
             if correct_d == 'L':
                 if is_u(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
             elif correct_d == 'R':
                 if is_u(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
             elif correct_d == 'U':
                 if is_l(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
             elif correct_d == 'D':
                 if is_l(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
         elif current_d == 'B':
             if correct_d == 'L':
                 if is_u(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
             elif correct_d == 'R':
                 if is_u(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
             elif correct_d == 'U':
                 if is_l(block):
-                    return '顺'
+                    return True
                 else:
-                    return '逆'
+                    return False
             elif correct_d == 'D':
                 if is_l(block):
-                    return '逆'
+                    return False
                 else:
-                    return '顺'
+                    return True
 
     def check_done(self, block):
         correct_direction = BLOCK_DONE.get(block.colors)
@@ -1045,8 +1047,8 @@ def bcube(formula):
 
 
 if __name__ == '__main__':
-    # fire.Fire(dict(
-    #     bcube=bcube,
-    # ))
-    # bcube("D' F2 R' L' B' U' L' B2 L' F B' D' L D2 L'")
-    bcube("L U")
+    fire.Fire(dict(
+        bcube=bcube,
+    ))
+    bcube("D' F2 R' L' B' U' L' B2 L' F B' D' L D2 L'")
+    # bcube("L U")
